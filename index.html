@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>積算電卓 V22-Final-Fixed</title>
+<title>♬報酬表電卓</title>
 <style>
 :root{--bg:#0b0b0c;--card:#14171a;--muted:#9aa4ad;--accent-1:#1e90ff;--orange:#ff9500;--dark-btn:#0b0b0c;font-family: sans-serif;}
 *{box-sizing:border-box}
@@ -71,8 +71,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;-webkit-font-smoo
 </head>
 <body>
 <div class="app">
-    <div class="header">
-        <div><div class="title">積算電卓 V22</div><div style="font-size:11px;font-weight:700;color:var(--muted);">V8 Final Version</div></div>
+    <div class="header">報酬表電卓 <div><div class="title"></divv<div style=""font-size:11px;font-weight:700;color:var(--muted;">V8 Final Version</div></div>
         <div style="display:flex; gap:12px; align-items:center;">
             <select id="rankSelector" style="padding:8px; background:#222; color:#fff; border:1px solid #444; border-radius:6px; font-weight:bold;"></select>
             <button id="openSettings" style="background:#333; color:#fff; border:none; padding:10px 14px; border-radius:8px; font-weight:900;">⚙</button>
@@ -114,10 +113,10 @@ const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 let cfg = JSON.parse(localStorage.getItem(CFG_KEY)) || {
     taxRate: 10, roundMethod: "floor", currentRank: "S",
     buttons: [
-        {name:"定期UP", prices:{H:6775,G:7462,F:7855,E:8149,D:8444,C:8836,B:9425,A:9524,S:9818,SS:10113,SSS:10211}},
-        {name:"定期GP", prices:{H:8444,G:9327,F:9818,E:10211,D:10505,C:10996,B:11684,A:11880,S:12273,SS:12567,SSS:12764}},
-        {name:"普通UP", prices:{H:7756,G:8542,F:9033,E:9327,D:9622,C:10113,B:10702,A:10898,S:11193,SS:11487,SSS:11684}},
-        {name:"普通GP", prices:{H:9425,G:10407,F:10996,E:11389,D:11684,C:12273,B:13058,A:13255,S:13647,SS:14040,SSS:14236}},
+        {name:"定期UP 14000", prices:{H:6775,G:7462,F:7855,E:8149,D:8444,C:8836,B:9425,A:9524,S:9818,SS:10113,SSS:10211}},
+        {name:"定期GP 17500", prices:{H:8444,G:9327,F:9818,E:10211,D:10505,C:10996,B:11684,A:11880,S:12273,SS:12567,SSS:12764}},
+        {name:"普通UP 16000", prices:{H:7756,G:8542,F:9033,E:9327,D:9622,C:10113,B:10702,A:10898,S:11193,SS:11487,SSS:11684}},
+        {name:"普通GP 19500", prices:{H:9425,G:10407,F:10996,E:11389,D:11684,C:12273,B:13058,A:13255,S:13647,SS:14040,SSS:14236}},
         {name:"音教備品UP", prices:{S:6382}},{name:"音教備品GP", prices:{S:7855}},
         {name:"納調UP (新品/中古)", prices:{S:5891}},{name:"納調GP (新品/中古)", prices:{S:8836}},
         {name:"店頭UP (名店)", prices:{S:6382}},{name:"店頭GP (名店)", prices:{S:7953}},
@@ -126,7 +125,7 @@ let cfg = JSON.parse(localStorage.getItem(CFG_KEY)) || {
         {name:"学校CF/S", prices:{D:7855, S:8542}},{name:"学校SW/B", prices:{D:8247, S:8935}},
         {name:"ヤマハホール", prices:{S:12764}},
         {name:"出張費3000", prices:{S:2356}},{name:"出張費3500", prices:{S:2847}},{name:"出張費4000", prices:{S:3338}},
-        {name:"日当", prices:{S:19636}},{name:"除湿剤", prices:{S:655}},
+        {name:"日当", prices:{S:19636}},{name:"除湿剤 1600", prices:{S:655}},
         {name:"予備23", prices:{S:0}},{name:"予備24", prices:{S:0}}
     ],
     freeButtons: [
@@ -203,8 +202,7 @@ function renderControlButtons(){
     const ac = document.createElement("button"); 
     ac.className = "btn-base btn-const ac-dark"; 
     ac.innerHTML = "AC"; 
-    ac.onclick = () => { if(confirm("消去しますか？")) { entries = []; updateUI(); scrollToTop(); } };
-    
+    ac.onclick = () => { entries = []; updateUI(); scrollToTop(); };
     area.append(blue, empty, c, ac);
 }
 
@@ -294,3 +292,4 @@ window.onload = () => {
 </script>
 </body>
 </html>
+
