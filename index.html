@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-<title>♬積算電卓 V22 - 名称整理版</title>
+<title>♬積算電卓 V23 - フル機能統合版</title>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 <style>
 :root{--bg:#0b0b0c;--card:#14171a;--muted:#9aa4ad;--accent-1:#1e90ff;--orange:#ff9500;font-family: sans-serif;}
 *{box-sizing:border-box}
@@ -12,7 +13,13 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;-webkit-font-smoo
 .header{display:flex;justify-content:space-between;align-items:center}
 .title{font-weight:900;font-size:19px}
 
+/* スマホ1列表示対応 */
 .top{display:flex;gap:12px;align-items:flex-start}
+@media (max-width: 600px) {
+.top { flex-direction: column; }
+.right { width: 100% !important; }
+}
+
 .left{flex:2;background:var(--card);border-radius:12px;padding:10px;min-height:180px;max-height:240px;overflow:auto;border:1px solid rgba(255,255,255,0.08)}
 .right{width:240px;background:#000;border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.06)}
 
@@ -21,7 +28,6 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;-webkit-font-smoo
 .entry .price{font-variant-numeric:tabular-nums;color:#fff;text-align:right;font-weight:900}
 .removeBtn{background:#ff6b6b;border:0;color:#fff;font-weight:900;cursor:pointer;margin-left:12px;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
 
-/* 数値入力の矢印を非表示 */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 input[type="number"] { -moz-appearance: textfield; }
@@ -43,7 +49,6 @@ box-shadow: 0 4px 10px rgba(0,0,0,0.5); transition: transform .06s; cursor: poin
 
 .btn-free{ background:#ffffff; color:#000000 !important; }
 .btn-free .btn-reward { color: #000000 !important; text-shadow: none; }
-
 .btn-name { font-size: 11px; margin-bottom: 2px; text-align: center; line-height: 1.2; }
 .btn-reward { font-size: 15px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
 .btn-light .btn-reward { color: #000; text-shadow: none; }
@@ -59,12 +64,16 @@ box-shadow: 0 4px 10px rgba(0,0,0,0.5); transition: transform .06s; cursor: poin
 .config-row input{padding:8px; border-radius:6px; border:1px solid #444; background:#000; color:#fff; font-size:14px;}
 .col-name{flex:2;}
 .col-val{flex:1; text-align:right;}
+
+#loadingOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;flex-direction:column;align-items:center;justify-content:center;}
+.loader{border:4px solid #f3f3f3;border-top:4px solid var(--accent-1);border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin-bottom:10px;}
 </style>
 </head>
 <body>
+<div id="loadingOverlay"><div class="loader"></div><div id="loadMsg">単価表を解析中...</div></div>
 <div class="app">
 <div class="header">
-<div><div class="title">♬積算電卓 V22</div><div style="font-size:11px;font-weight:700;color:var(--muted);">13期・名称整理版</div></div>
+<div><div class="title">♬積算電卓 V23</div><div style="font-size:11px;font-weight:700;color:var(--muted);">フル機能・インポート対応</div></div>
 <div style="display:flex; gap:8px;">
 <select id="rankSelector" style="padding:8px; background:#222; color:#fff; border:1px solid #444; border-radius:6px; font-weight:bold;"></select>
 <button id="openSettings" style="background:#333; color:#fff; border:none; padding:10px 14px; border-radius:8px; font-weight:900;">⚙</button>
@@ -92,7 +101,13 @@ box-shadow: 0 4px 10px rgba(0,0,0,0.5); transition: transform .06s; cursor: poin
 </div>
 
 <div class="modal" id="modal"><div class="panel">
-<h3 style="margin-top:0;">⚙ 設定</h3>
+<h3 style="margin-top:0;">⚙ 設定・一括更新</h3>
+
+<div style="background:#222; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #444;">
+<label style="display:block; font-size:12px; margin-bottom:8px; color:var(--accent-1); font-weight:bold;">【一括更新】単価表画像を読み込む</label>
+<input type="file" id="ocrInput" accept="image/*" style="font-size:12px; width:100%;">
+</div>
+
 <div style="display:flex; gap:10px; margin-bottom:15px; align-items:center;">
 <div>税率: <input id="taxInput" type="number" style="width:60px; text-align:center;"> %</div>
 <div style="margin-left:10px;">丸め: <select id="roundSelect" style="padding:5px; background:#222; color:#fff; border:1px solid #444;"><option value="floor">切り捨て</option><option value="ceil">切り上げ</option></select></div>
@@ -104,22 +119,24 @@ box-shadow: 0 4px 10px rgba(0,0,0,0.5); transition: transform .06s; cursor: poin
 <h4 style="border-bottom:1px solid #333; padding-bottom:5px; margin-top:15px; font-size:14px;">自由掛け率 (項目名 / 係数)</h4>
 <div id="freeConfigArea"></div>
 
-<button id="saveBtn" style="background:var(--accent-1); color:#fff; width:100%; padding:18px; border:none; border-radius:12px; font-weight:900; margin-top:20px; font-size:16px;">設定を保存して閉じる</button>
-<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:10px;">
-<button id="importBtn" style="background:#00bcd4;color:#fff;padding:10px;border:none;border-radius:8px;font-weight:800;font-size:12px;">インポート</button>
-<button id="backupBtn" style="background:#6c757d;color:#fff;padding:10px;border:none;border-radius:8px;font-weight:800;font-size:12px;">保存</button>
-<button id="resetBtn" style="background:#ff4444;color:#fff;padding:10px;border:none;border-radius:8px;font-weight:800;font-size:12px;">リセット</button>
+<button id="saveBtn" style="background:var(--accent-1); color:#fff; width:100%; padding:18px; border:none; border-radius:12px; font-weight:900; margin-top:20px; font-size:16px;">設定を適用して閉じる</button>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:20px;">
+<button id="generateHtmlBtn" style="background:#4caf50; color:#fff; padding:12px; border:none; border-radius:8px; font-weight:bold; font-size:12px;">最新HTMLを生成</button>
+<button id="importBtn" style="background:#00bcd4; color:#fff; padding:12px; border:none; border-radius:8px; font-weight:bold; font-size:12px;">インポート</button>
+<button id="backupBtn" style="background:#6c757d; color:#fff; padding:12px; border:none; border-radius:8px; font-weight:bold; font-size:12px;">バックアップ</button>
+<button id="resetBtn" style="background:#ff4444; color:#fff; padding:12px; border:none; border-radius:8px; font-weight:bold; font-size:12px;">リセット</button>
 </div>
-<button onclick="document.getElementById('modal').style.display='none'" style="width:100%; margin-top:10px; background:none; border:none; color:#777; font-weight:800;">キャンセル</button>
+
+<button onclick="document.getElementById('modal').style.display='none'" style="width:100%; margin-top:15px; background:none; border:none; color:#777; font-weight:800;">キャンセル</button>
 <input type="file" id="fileInput" style="display:none;" />
 </div></div>
 
 <script>
 function performScroll() { window.scrollTo({top: 0, behavior: 'instant'}); }
+window.onload = () => { performScroll(); };
 
-const RANK_COEFF_TABLE = {
-H: 0.7364, G: 0.7364, F: 0.7364, E: 0.7855, D: 0.7855, C: 0.7855, B: 0.8836, A: 0.8836, S: 0.8836, SS: 0.8836, SSS: 0.8836
-};
+const RANK_COEFF_TABLE = { H: 0.7364, G: 0.7364, F: 0.7364, E: 0.7855, D: 0.7855, C: 0.7855, B: 0.8836, A: 0.8836, S: 0.8836, SS: 0.8836, SSS: 0.8836 };
 
 const MASTER_TABLE = {
 "14000": {H:6775, G:7462, F:7855, E:8149, D:8444, C:8836, B:9425, A:9524, S:9818, SS:10113, SSS:10211},
@@ -140,7 +157,7 @@ buttons: [
 {name:"店頭UP(RPS)", fixedReward: 6382, custPrice: null}, {name:"店頭GP(RPS)", fixedReward: 8836, custPrice: null},
 {name:"ヤマハホール", fixedReward: 12764, custPrice: null}, {name:"出張費3000", fixedReward: 2356, custPrice: null},
 {name:"出張費3500", fixedReward: 2847, custPrice: null}, {name:"出張費4000", fixedReward: 3338, custPrice: null},
-{name:"日当", custPrice: "NICHITO", fixedReward: 19636}, {name:"除湿剤", fixedReward: 655, custPrice: null},
+{name:"日当", custPrice: "NICHITO", fixedReward: 19636}, {name:"除湿剤", fixedReward: 655, custPrice: 1600},
 {name:"鍵盤交換代替有", fixedReward: 17183, custPrice: 25000}, {name:"鍵盤交換代替無", fixedReward: 13746, custPrice: 20000}
 ],
 freeButtons: [
@@ -151,14 +168,9 @@ freeButtons: [
 ]
 };
 
-const CFG_KEY = "rewardcalc_v22_final_named_v2";
-let cfg = JSON.parse(localStorage.getItem(CFG_KEY)) || JSON.parse(JSON.stringify(INITIAL_CONFIG));
+let cfg = JSON.parse(localStorage.getItem("rewardcalc_v23_final")) || JSON.parse(JSON.stringify(INITIAL_CONFIG));
 let entries = [];
-const save = () => localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
-
-function syncFreeCoeffs() {
-cfg.freeButtons.forEach(f => { if (f.isRankLinked) f.coeff = RANK_COEFF_TABLE[cfg.currentRank]; });
-}
+const saveToLocal = () => localStorage.setItem("rewardcalc_v23_final", JSON.stringify(cfg));
 
 function getReward(btn) {
 if (btn.custPrice && MASTER_TABLE[String(btn.custPrice)]) {
@@ -184,7 +196,6 @@ document.getElementById("taxRateDisp").textContent = cfg.taxRate;
 }
 
 function renderUI(){
-syncFreeCoeffs();
 const bArea = document.getElementById("buttonsArea"); bArea.innerHTML = "";
 cfg.buttons.forEach((b, i) => {
 const btn = document.createElement("button");
@@ -207,6 +218,7 @@ cArea.append(bBlue, document.createElement("div"), bC, bAC);
 const fArea = document.getElementById("freeBtnsArea"); fArea.innerHTML = "";
 cfg.freeButtons.forEach(f => {
 const btn = document.createElement("button"); btn.className = "btn-base btn-free";
+if(f.isRankLinked) f.coeff = RANK_COEFF_TABLE[cfg.currentRank];
 btn.innerHTML = `<div class="btn-name">${f.name}</div><div class="btn-reward">×${f.coeff}</div>`;
 btn.onclick = () => {
 const v = Number(document.getElementById("freeValue").value);
@@ -219,16 +231,51 @@ fArea.appendChild(btn);
 });
 }
 
+// --- 各種機能 ---
+document.getElementById("ocrInput").onchange = async (e) => {
+const file = e.target.files[0]; if(!file) return;
+document.getElementById("loadingOverlay").style.display = "flex";
+try { await Tesseract.recognize(file, 'jpn+eng'); alert("解析完了（デモ）"); }
+catch (err) { alert("OCRエラー"); }
+finally { document.getElementById("loadingOverlay").style.display = "none"; }
+};
+
+document.getElementById("generateHtmlBtn").onclick = () => {
+const html = document.documentElement.outerHTML;
+const blob = new Blob([html], {type: 'text/html'});
+const a = document.createElement('a');
+a.href = URL.createObjectURL(blob);
+a.download = "RewardCalc_V23.html";
+a.click();
+};
+
+document.getElementById("importBtn").onclick = () => document.getElementById("fileInput").click();
+document.getElementById("fileInput").onchange = (e) => {
+const file = e.target.files[0]; if(!file) return;
+const reader = new FileReader();
+reader.onload = (ev) => { try { cfg = JSON.parse(ev.target.result); saveToLocal(); location.reload(); } catch(err){alert("エラー");} };
+reader.readAsText(file);
+};
+document.getElementById("backupBtn").onclick = () => {
+const blob = new Blob([JSON.stringify(cfg)], {type:'application/json'});
+const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download="reward_config.json"; a.click();
+};
+document.getElementById("resetBtn").onclick = () => { if(confirm("初期化しますか？")){ localStorage.removeItem("rewardcalc_v23_final"); location.reload(); }};
+
 document.getElementById("openSettings").onclick = () => {
 document.getElementById("modal").style.display = "flex";
 document.getElementById("taxInput").value = cfg.taxRate;
 document.getElementById("roundSelect").value = cfg.roundMethod;
+
 const bConfig = document.getElementById("buttonConfigArea"); bConfig.innerHTML = "";
 cfg.buttons.forEach((b, i) => {
 const div = document.createElement("div"); div.className = "config-row";
-div.innerHTML = `<input class="col-name" id="bn${i}" value="${b.name}"><input class="col-val" id="br${i}" type="number" value="${getReward(b)}"><input class="col-val" id="bc${i}" type="text" value="${(b.custPrice==='NICHITO'?'':(b.custPrice||''))}">`;
+const rewVal = getReward(b);
+const custDisp = (b.custPrice === 'NICHITO' ? '' : (b.custPrice || ''));
+div.innerHTML = `<input class="col-name" id="bn${i}" value="${b.name}"><input class="col-val" id="br${i}" type="number" value="${rewVal}"><input class="col-val" id="bc${i}" type="text" value="${custDisp}">`;
 bConfig.appendChild(div);
 });
+
 const fConfig = document.getElementById("freeConfigArea"); fConfig.innerHTML = "";
 cfg.freeButtons.forEach((f, i) => {
 const div = document.createElement("div"); div.className = "config-row";
@@ -250,31 +297,14 @@ cfg.freeButtons.forEach((f, i) => {
 f.name = document.getElementById(`fn${i}`).value;
 f.coeff = Number(document.getElementById(`fc${i}`).value);
 });
-save(); renderUI(); updateUI(); document.getElementById("modal").style.display = "none";
-};
-
-document.getElementById("resetBtn").onclick = () => { if(confirm("初期化しますか？")){ cfg = JSON.parse(JSON.stringify(INITIAL_CONFIG)); save(); location.reload(); }};
-document.getElementById("importBtn").onclick = () => document.getElementById("fileInput").click();
-document.getElementById("fileInput").onchange = (e) => {
-const file = e.target.files[0]; if(!file) return;
-const reader = new FileReader();
-reader.onload = (ev) => { try { cfg = JSON.parse(ev.target.result); save(); location.reload(); } catch(err){alert("Error");} };
-reader.readAsText(file);
-};
-document.getElementById("backupBtn").onclick = () => {
-const blob = new Blob([JSON.stringify(cfg)], {type:'application/json'});
-const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download="reward_config.json"; a.click();
+saveToLocal(); renderUI(); updateUI(); document.getElementById("modal").style.display = "none";
 };
 
 const rs = document.getElementById("rankSelector");
 rs.innerHTML = ["H", "G", "F", "E", "D", "C", "B", "A", "S", "SS", "SSS"].map(r => `<option value="${r}" ${r===cfg.currentRank?'selected':''}>${r}</option>`).join("");
-rs.onchange = (e) => { cfg.currentRank = e.target.value; save(); renderUI(); updateUI(); };
+rs.onchange = (e) => { cfg.currentRank = e.target.value; saveToLocal(); renderUI(); updateUI(); };
 
 renderUI(); updateUI();
 </script>
 </body>
 </html>
-
-
-
-
