@@ -98,13 +98,13 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;-webkit-font-smoo
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
 const MASTER_TABLE = {
-    "teikiUP": {H:6775, G:7462, F:7855, E:8149, D:8444, G2:8836, B:9425, A:9524, S:9818, SS:10113, SSS:10211},
-    "teikiGP": {H:8444, G:9327, F:9818, E:10211, D:10505, G2:10996, B:11684, A:11880, S:12273, SS:12567, SSS:12764},
-    "futsuUP": {H:7756, G:8542, F:9033, E:9327, D:9622, G2:10113, B:10702, A:10898, S:11193, SS:11487, SSS:11684},
-    "futsuGP": {H:9425, G:10407, F:10996, E:11389, D:11684, G2:12273, B:13058, A:13255, S:13647, SS:14040, SSS:14236},
-    "nichito": {H:13745, G:14727, F:15709, E:16691, D:17673, G2:18655, B:19636, A:19636, S:19636, SS:19636, SSS:19636}
+    "teikiUP": {H:6775, G:7462, F:7855, E:8149, D:8444, C:8836, B:9425, A:9524, S:9818, SS:10113, SSS:10211},
+    "teikiGP": {H:8444, G:9327, F:9818, E:10211, D:10505, C:10996, B:11684, A:11880, S:12273, SS:12567, SSS:12764},
+    "futsuUP": {H:7756, G:8542, F:9033, E:9327, D:9622, C:10113, B:10702, A:10898, S:11193, SS:11487, SSS:11684},
+    "futsuGP": {H:9425, G:10407, F:10996, E:11389, D:11684, C:12273, B:13058, A:13255, S:13647, SS:14040, SSS:14236},
+    "nichito": {H:13745, G:14727, F:15709, E:16691, D:17673, C:18655, B:19636, A:19636, S:19636, SS:19636, SSS:19636}
 };
-const RANK_COEFF_TABLE = { H:0.7364, G:0.7364, F:0.7364, E:0.7855, D:0.7855, G2:0.7855, B:0.8836, A:0.8836, S:0.8836, SS:0.8836, SSS:0.8836 };
+const RANK_COEFF_TABLE = { H:0.7364, G:0.7364, F:0.7364, E:0.7855, D:0.7855, C:0.7855, B:0.8836, A:0.8836, S:0.8836, SS:0.8836, SSS:0.8836 };
 
 const INITIAL_CONFIG = {
     "taxRate": 10,
@@ -213,7 +213,7 @@ function renderUI(){
 
     const rs = document.getElementById("rankSelector");
     rs.innerHTML = "";
-    ["H","G","F","E","D","G2","B","A","S","SS","SSS"].forEach(r => {
+    ["H","G","F","E","D","C","B","A","S","SS","SSS"].forEach(r => {
         const o = document.createElement("option"); o.value=r; o.textContent=(r==="G2"?"G":r);
         if(r===cfg.currentRank) o.selected=true; rs.appendChild(o);
     });
@@ -329,6 +329,7 @@ renderUI(); updateUI();
 </script>
 </body>
 </html>
+
 
 
 
