@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>♬積算電卓 V24.25 - スクロール修正版</title>
+<title>♬積算電卓 V24.25 - ランクC修正版</title>
 
 <script src="https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
@@ -51,9 +51,10 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;-webkit-font-smoo
 </style>
 </head>
 <body>
-<div id="top-anchor"></div> <div class="app">
+<div id="top-anchor"></div>
+<div class="app">
     <div class="header">
-        <div><div class="title">♬積算電卓 V24.25</div><div style="font-size:11px;color:var(--muted);">設定継承・スクロール修正版</div></div>
+        <div><div class="title">♬積算電卓 V24.25</div><div style="font-size:11px;color:var(--muted);">ランクC/G修正・スクロール対応</div></div>
         <div style="display:flex; gap:8px;">
             <select id="rankSelector" style="padding:8px; background:#222; color:#fff; border:1px solid #444; border-radius:6px; font-weight:bold;"></select>
             <button id="openSettings" style="background:#333; color:#fff; border:none; padding:10px 14px; border-radius:8px; font-weight:900;">⚙</button>
@@ -97,6 +98,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;-webkit-font-smoo
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
+// G2を内部的に管理しつつ、表示は「C」として扱うテーブル構成に修正
 const MASTER_TABLE = {
     "teikiUP": {H:6775, G:7462, F:7855, E:8149, D:8444, C:8836, B:9425, A:9524, S:9818, SS:10113, SSS:10211},
     "teikiGP": {H:8444, G:9327, F:9818, E:10211, D:10505, C:10996, B:11684, A:11880, S:12273, SS:12567, SSS:12764},
@@ -118,8 +120,8 @@ const INITIAL_CONFIG = {
         { "name": "音教備品GP", "masterKey": "", "fixedReward": 7855, "custPrice": "" },
         { "name": "納調UP", "masterKey": "", "fixedReward": 5891, "custPrice": "" },
         { "name": "納調GP", "masterKey": "", "fixedReward": 8836, "custPrice": "" },
-        { "name": "店頭UP(名古屋店)", "masterKey": "", "fixedReward": 6382, "custPrice": "" },
-        { "name": "店頭GP(名古屋店)", "masterKey": "", "fixedReward": 7953, "custPrice": "" },
+        { "name": "店頭UP(名)", "masterKey": "", "fixedReward": 6382, "custPrice": "" },
+        { "name": "店頭GP(名)", "masterKey": "", "fixedReward": 7953, "custPrice": "" },
         { "name": "店頭UP(RPS)", "masterKey": "", "fixedReward": 6382, "custPrice": "" },
         { "name": "店頭GP(RPS)", "masterKey": "", "fixedReward": 8836, "custPrice": "" },
         { "name": "出張費B", "masterKey": "", "fixedReward": 1473, "custPrice": "" },
@@ -156,7 +158,6 @@ if (cfg.taxRate <= 0) cfg.taxRate = 10;
 
 let entries = [];
 
-// 最上部へ戻る関数
 function scrollToTop() {
     setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -213,8 +214,9 @@ function renderUI(){
 
     const rs = document.getElementById("rankSelector");
     rs.innerHTML = "";
+    // リストの表示を修正（G2を排除し、Cとして独立させる）
     ["H","G","F","E","D","C","B","A","S","SS","SSS"].forEach(r => {
-        const o = document.createElement("option"); o.value=r; o.textContent=(r==="G2"?"G":r);
+        const o = document.createElement("option"); o.value=r; o.textContent=r;
         if(r===cfg.currentRank) o.selected=true; rs.appendChild(o);
     });
     rs.onchange = (e) => { cfg.currentRank = e.target.value; renderUI(); updateUI(); };
@@ -280,9 +282,12 @@ document.getElementById("ocrBtn").onclick = async () => {
             const lines = res.data.text.split('\n');
             cfg.buttons.forEach(b => {
                 if(b.masterKey) return;
-                for(let l of lines) if(l.includes(b.name)){
-                    let m = l.match(/[0-9,]{3,7}/);
-                    if(m) b.fixedReward = Number(m[0].replace(/,/g,''));
+                for(let l of lines) {
+                   // 曖昧な一致を避けるため、完全に含まれているかチェック
+                   if(l.replace(/\s/g,'').includes(b.name.replace(/\s/g,''))){
+                        let m = l.match(/[0-9,]{3,7}/);
+                        if(m) b.fixedReward = Number(m[0].replace(/,/g,''));
+                    }
                 }
             });
             alert("解析完了"); localStorage.setItem("rewardcalc_v2425", JSON.stringify(cfg)); location.reload();
@@ -319,7 +324,7 @@ document.getElementById("genBtn").onclick = () => {
     html = html.replace(/<div class=\"modal\" id=\"modal\" style=\"display: flex;\">/g, '<div class=\"modal\" id=\"modal\">');
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([html], {type: "text/html"}));
-    a.download = "piano_calc_final.html"; a.click();
+    a.download = "piano_calc_final_v2.html"; a.click();
 };
 
 document.getElementById("resetBtn").onclick = () => { if(confirm("リセット？")){ localStorage.removeItem("rewardcalc_v2425"); location.reload(); }};
@@ -329,7 +334,5 @@ renderUI(); updateUI();
 </script>
 </body>
 </html>
-
-
 
 
