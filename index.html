@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>♬積算電卓 V26.9</title>
+<title>♬積算電卓 V26.9 - 視認性調整版</title>
 <style>
 :root{--bg:#0b0b0c;--card:#14171a;--accent:#1e90ff;--orange:#ff9500;--red:#f44336;font-family:sans-serif;}
 *{box-sizing:border-box}
@@ -15,17 +15,19 @@ body{margin:0;background:var(--bg);color:#fff;font-size:14px;overflow-x:hidden;}
 .stack-view{flex:2;background:var(--card);border-radius:12px;padding:5px;height:180px;overflow-y:auto;border:1px solid #333;}
 .total-view{width:240px;background:#000;border-radius:12px;padding:15px;border:1px solid #333;}
 
-/* 個別削除行のデザイン修正 */
+/* 積算部分（左側リスト）の文字を大きく修正 */
 .entry{display:flex;align-items:center;padding:10px 8px;border-bottom:1px solid #222;font-variant-numeric:tabular-nums;cursor:pointer;}
 .entry:active{background:#333;}
-.entry-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.entry-price{margin:0 10px;font-weight:bold;}
-/* 赤丸白抜きのバツ印 */
+.entry-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px;font-weight:bold;}
+.entry-price{margin:0 10px;font-weight:900;font-size:18px;} /* 右側と合わせたサイズ */
 .del-btn {
     width: 22px; height: 22px; background: var(--red); color: #fff;
     border-radius: 50%; display: flex; align-items: center; justify-content: center;
     font-size: 14px; font-weight: bold; line-height: 1; margin-left: 4px;
 }
+
+/* 右側計算エリアの文字を白く、大きく */
+.calc-row{display:flex;justify-content:space-between;font-size:18px;font-weight:900;color:#fff;margin-bottom:8px;}
 
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
 .btn-blue{background:linear-gradient(180deg,#334c66,#243b55);color:#fff;} 
@@ -48,17 +50,17 @@ body{margin:0;background:var(--bg);color:#fff;font-size:14px;overflow-x:hidden;}
     <div class="header">
         <div style="font-size:19px;font-weight:900">♬積算電卓 V26.9</div>
         <div style="display:flex;gap:8px">
-            <select id="rSel" style="padding:8px;background:#222;color:#fff;border-radius:6px;border:1px solid #444;"></select>
-            <button onclick="openCfg()" style="background:#333;color:#fff;border:none;padding:10px;border-radius:8px;cursor:pointer">⚙ 設定</button>
+            <select id="rSel" style="padding:8px;background:#222;color:#fff;border-radius:6px;border:1px solid #444; font-weight:bold;"></select>
+            <button onclick="openCfg()" style="background:#333;color:#fff;border:none;padding:10px;border-radius:8px;cursor:pointer; font-weight:bold;">⚙ 設定</button>
         </div>
     </div>
 
     <div class="display-area">
         <div id="stack" class="stack-view"></div>
         <div class="total-view">
-            <div style="display:flex;justify-content:space-between;font-size:12px;color:#9aa4ad"><span>税抜報酬</span><span id="sub">0</span></div>
-            <div style="display:flex;justify-content:space-between;font-size:12px;color:#9aa4ad;margin-top:4px"><span id="taxLabel">消費税(10%)</span><span id="tax">0</span></div>
-            <div style="display:flex;justify-content:space-between;font-size:22px;font-weight:900;color:var(--orange);margin-top:10px;border-top:1px solid #333;padding-top:10px">
+            <div class="calc-row"><span>税抜報酬</span><span id="sub">0</span></div>
+            <div class="calc-row"><span id="taxLabel">消費税(10%)</span><span id="tax">0</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:24px;font-weight:900;color:var(--orange);margin-top:10px;border-top:1px solid #333;padding-top:10px">
                 <span>合計</span><span id="tot">0</span>
             </div>
         </div>
@@ -88,15 +90,12 @@ body{margin:0;background:var(--bg);color:#fff;font-size:14px;overflow-x:hidden;}
                 <input type="number" id="cfgTax" style="background:#000;color:#fff;border:1px solid #444;padding:8px;border-radius:5px;width:80px;" value="10">
             </div>
         </div>
-
         <h3 style="text-align:center">⚙ 定数ボタン設定</h3>
         <div class="config-header"><span>定数名</span><span>報酬</span><span>顧客請求額</span></div>
         <div id="cButtons"></div>
         <h3 style="text-align:center;margin-top:20px;">⚙ 係数ボタン設定</h3>
         <div id="cFree"></div>
-        
         <button onclick="save()" class="cmd-btn" style="background:#4a90e2;width:100%;margin:20px 0;">設定を適用して閉じる</button>
-        
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <input type="file" id="fileInp" style="display:none" accept="image/*,application/pdf">
             <button class="cmd-btn" style="background:#f39c12;" onclick="document.getElementById('fileInp').click()">PDF・画像から読込</button>
@@ -165,7 +164,7 @@ function update(){
     document.getElementById("tax").innerText = Math.floor(sum * (tRate/100)).toLocaleString();
     document.getElementById("tot").innerText = Math.floor(sum * (1 + tRate/100)).toLocaleString();
     s.scrollTop = s.scrollHeight;
-    window.scrollTo(0,0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function del(i){ data.splice(i, 1); update(); }
 function draw(){
@@ -177,7 +176,8 @@ function draw(){
         let colorClass = (col === 0 || col === 2) ? "btn-blue" : "btn-lblue";
         if (b.n.includes("出張費")) colorClass = "btn-green";
         el.className = "btn " + colorClass;
-        el.innerHTML = `<div style="font-size:10px">${b.n}</div><div style="font-size:16px">${Math.round(v).toLocaleString()}</div><div style="font-size:9px;opacity:0.6;">(${b.c||'-'})</div>`;
+        // 金額を18pxに、顧客請求額を11pxに拡大
+        el.innerHTML = `<div style="font-size:10px">${b.n}</div><div style="font-size:18px">${Math.round(v).toLocaleString()}</div><div style="font-size:11px;opacity:0.8;">(${b.c||'-'})</div>`;
         el.onclick = () => { if(v>0){data.push({n:b.n,p:v});update();} };
         g1.appendChild(el);
     });
@@ -185,7 +185,7 @@ function draw(){
     cfg.fBtns.forEach(f => {
         const c = M[f.co] ? (M[f.co][cfg.rank] || M[f.co]) : Number(f.co);
         const el = document.createElement("button"); el.className = "btn btn-free";
-        el.innerHTML = `<div style="font-size:10px">${f.n}</div><div>×${typeof c === 'number' ? c.toFixed(4) : c}</div>`;
+        el.innerHTML = `<div style="font-size:10px">${f.n}</div><div style="font-size:16px">×${typeof c === 'number' ? c.toFixed(4) : c}</div>`;
         el.onclick = () => { const v = document.getElementById("fVal").value; if(v){data.push({n:f.n,p:v*c});update();document.getElementById("fVal").value="";} };
         g2.appendChild(el);
     });
@@ -231,4 +231,3 @@ window.onload = () => {
 </script>
 </body>
 </html>
-
