@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>♬積算電卓 V26.9 - 視認性調整版</title>
+<title>♬積算電卓 V26.9 - バランス最適化版</title>
 <style>
 :root{--bg:#0b0b0c;--card:#14171a;--accent:#1e90ff;--orange:#ff9500;--red:#f44336;font-family:sans-serif;}
 *{box-sizing:border-box}
@@ -15,26 +15,26 @@ body{margin:0;background:var(--bg);color:#fff;font-size:14px;overflow-x:hidden;}
 .stack-view{flex:2;background:var(--card);border-radius:12px;padding:5px;height:180px;overflow-y:auto;border:1px solid #333;}
 .total-view{width:240px;background:#000;border-radius:12px;padding:15px;border:1px solid #333;}
 
-/* 積算部分（左側リスト）の文字を大きく修正 */
+/* 積算部分（左側リスト） */
 .entry{display:flex;align-items:center;padding:10px 8px;border-bottom:1px solid #222;font-variant-numeric:tabular-nums;cursor:pointer;}
 .entry:active{background:#333;}
-.entry-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px;font-weight:bold;}
-.entry-price{margin:0 10px;font-weight:900;font-size:18px;} /* 右側と合わせたサイズ */
+.entry-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px;font-weight:bold;}
+.entry-price{margin:0 10px;font-weight:900;font-size:18px;}
 .del-btn {
     width: 22px; height: 22px; background: var(--red); color: #fff;
     border-radius: 50%; display: flex; align-items: center; justify-content: center;
     font-size: 14px; font-weight: bold; line-height: 1; margin-left: 4px;
 }
 
-/* 右側計算エリアの文字を白く、大きく */
+/* 右側計算エリア */
 .calc-row{display:flex;justify-content:space-between;font-size:18px;font-weight:900;color:#fff;margin-bottom:8px;}
 
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
 .btn-blue{background:linear-gradient(180deg,#334c66,#243b55);color:#fff;} 
 .btn-lblue{background:linear-gradient(180deg,#e3f2fd,#bbdefb);color:#000;} 
 .btn-green{background:linear-gradient(180deg,#90ee90,#4ecb71);color:#004d40;} 
-.btn{border-radius:12px;padding:8px 2px;min-height:80px;border:none;font-weight:900;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:manipulation;}
-.btn-free{background:#fff;color:#000;min-height:70px;font-size:11px;}
+.btn{border-radius:12px;padding:10px 2px;min-height:95px;border:none;font-weight:900;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:manipulation;line-height:1.3;}
+.btn-free{background:#fff;color:#000;min-height:75px;}
 .free-input{width:100%;padding:15px;font-size:24px;text-align:right;border-radius:12px;border:none;background:#fff;color:#000;font-weight:bold;}
 
 #m { position:fixed; inset:0; background:rgba(0,0,0,0.9); display:none; align-items:center; justify-content:center; z-index:1000; }
@@ -176,8 +176,12 @@ function draw(){
         let colorClass = (col === 0 || col === 2) ? "btn-blue" : "btn-lblue";
         if (b.n.includes("出張費")) colorClass = "btn-green";
         el.className = "btn " + colorClass;
-        // 金額を18pxに、顧客請求額を11pxに拡大
-        el.innerHTML = `<div style="font-size:10px">${b.n}</div><div style="font-size:18px">${Math.round(v).toLocaleString()}</div><div style="font-size:11px;opacity:0.8;">(${b.c||'-'})</div>`;
+        // 指定のサイズ（15px, 15px, 13px）を適用
+        el.innerHTML = `
+            <div style="font-size:15px; margin-bottom:2px; font-weight:bold;">${b.n}</div>
+            <div style="font-size:15px; font-weight:900;">${Math.round(v).toLocaleString()}</div>
+            <div style="font-size:13px; opacity:0.9;">(${b.c||'-'})</div>
+        `;
         el.onclick = () => { if(v>0){data.push({n:b.n,p:v});update();} };
         g1.appendChild(el);
     });
@@ -185,7 +189,7 @@ function draw(){
     cfg.fBtns.forEach(f => {
         const c = M[f.co] ? (M[f.co][cfg.rank] || M[f.co]) : Number(f.co);
         const el = document.createElement("button"); el.className = "btn btn-free";
-        el.innerHTML = `<div style="font-size:10px">${f.n}</div><div style="font-size:16px">×${typeof c === 'number' ? c.toFixed(4) : c}</div>`;
+        el.innerHTML = `<div style="font-size:13px; font-weight:bold;">${f.n}</div><div style="font-size:14px">×${typeof c === 'number' ? c.toFixed(4) : c}</div>`;
         el.onclick = () => { const v = document.getElementById("fVal").value; if(v){data.push({n:f.n,p:v*c});update();document.getElementById("fVal").value="";} };
         g2.appendChild(el);
     });
