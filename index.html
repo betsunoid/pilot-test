@@ -3,337 +3,232 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>♬積算電卓 V24.25 - </title>
-
-<script src="https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-
+<title>♬積算電卓 V26.9</title>
 <style>
-:root{--bg:#0b0b0c;--card:#14171a;--muted:#9aa4ad;--accent-1:#1e90ff;--orange:#ff9500;--green:#4caf50;--cyan:#00bcd4;--gray:#666;--red:#f44336;font-family: sans-serif;}
+:root{--bg:#0b0b0c;--card:#14171a;--accent:#1e90ff;--orange:#ff9500;--red:#f44336;font-family:sans-serif;}
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);color:#fff;-webkit-font-smoothing:antialiased}
-.app{max-width:820px;margin:8px auto;padding:12px;display:flex;flex-direction:column;gap:12px}
+body{margin:0;background:var(--bg);color:#fff;font-size:14px;overflow-x:hidden;}
+.app{max-width:820px;margin:0 auto;padding:12px;display:flex;flex-direction:column;gap:12px;min-height:100vh;}
 .header{display:flex;justify-content:space-between;align-items:center}
-.title{font-weight:900;font-size:19px}
-.top-section{display:flex;gap:12px;align-items:flex-start}
-@media (max-width: 600px) { .top-section { flex-direction: column; } .right { width: 100% !important; } }
-.left{flex:2;background:var(--card);border-radius:12px;padding:10px;min-height:180px;max-height:240px;overflow:auto;border:1px solid rgba(255,255,255,0.08)}
-.right{width:240px;background:#000;border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.06)}
-.entry{display:flex;justify-content:space-between;align-items:center;padding:10px 8px;border-bottom:1px solid rgba(255,255,255,0.05)}
-.entry .label{font-weight:800;font-size:14px}
-.entry .price{font-variant-numeric:tabular-nums;color:#fff;text-align:right;font-weight:900}
-.removeBtn{background:#ff6b6b;border:0;color:#fff;font-weight:900;cursor:pointer;margin-left:12px;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
-.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.btn-base { border-radius: 12px; padding: 8px 2px; min-height: 75px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: 900; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.5); transition: transform .06s; cursor: pointer; }
-.btn-base:active{transform:translateY(2px);}
-.btn-dark{ background:linear-gradient(180deg, #334c66, #243b55); color:#fff; }
-.btn-light{ background:linear-gradient(180deg, #e3f2fd, #bbdefb); color:#000; }
-.btn-blue{ background:linear-gradient(180deg, #1e90ff, #007bff); color:#fff; }
-.btn-travel{ background:linear-gradient(180deg, #90ee90, #4ecb71); color:#004d40; }
-.btn-ac{ background:linear-gradient(180deg, #ff4500, #cc3700); color:#fff; }
-.btn-c{ background:linear-gradient(180deg, #ff7f50, #ff6347); color:#fff; }
-.btn-free{ background:#ffffff; color:#000000 !important; }
-.btn-name { font-size: 10px; margin-bottom: 2px; text-align: center; line-height: 1.2; }
-.btn-reward { font-size: 15px; }
-.btn-cust { font-size: 9px; opacity: 0.7; }
-.free-group{background:rgba(255,255,255,0.04);border-radius:14px;padding:15px;border:1px solid rgba(255,255,255,0.08);}
-.free-title{font-size:11px; color:var(--muted); font-weight:bold; margin-bottom:10px; margin-left:4px; line-height:1.4;}
-.free-input{width:100%; background:#fff; border:2px solid #555; padding:12px; border-radius:10px; text-align:right; color:#000; font-size:24px; font-weight:bold;}
-.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:99;background:rgba(0,0,0,0.95)}
-.panel{width:98%;max-width:820px;max-height:90vh;overflow:auto;background:#111;border-radius:16px;padding:20px;}
-.config-row{display:flex; gap:5px; margin-bottom:8px;}
-.config-row input{padding:10px; border-radius:6px; border:1px solid #444; background:#000; color:#fff; font-size:14px;}
-.col-name{flex:2;}
-.col-val{flex:1; text-align:right;}
-.modal-footer{display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:20px;}
-.main-btn{grid-column: span 2; padding:20px; background:var(--accent-1); color:#fff; border:none; border-radius:12px; font-weight:900; font-size:16px;}
-.sub-btn{padding:15px; border:none; border-radius:8px; color:#fff; font-weight:bold; cursor:pointer;}
+.display-area{display:flex;gap:12px;}
+@media(max-width:600px){.display-area{flex-direction:column;}.total-view{width:100%!important;}}
+.stack-view{flex:2;background:var(--card);border-radius:12px;padding:5px;height:180px;overflow-y:auto;border:1px solid #333;}
+.total-view{width:240px;background:#000;border-radius:12px;padding:15px;border:1px solid #333;}
+
+/* 個別削除行のデザイン修正 */
+.entry{display:flex;align-items:center;padding:10px 8px;border-bottom:1px solid #222;font-variant-numeric:tabular-nums;cursor:pointer;}
+.entry:active{background:#333;}
+.entry-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.entry-price{margin:0 10px;font-weight:bold;}
+/* 赤丸白抜きのバツ印 */
+.del-btn {
+    width: 22px; height: 22px; background: var(--red); color: #fff;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: bold; line-height: 1; margin-left: 4px;
+}
+
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.btn-blue{background:linear-gradient(180deg,#334c66,#243b55);color:#fff;} 
+.btn-lblue{background:linear-gradient(180deg,#e3f2fd,#bbdefb);color:#000;} 
+.btn-green{background:linear-gradient(180deg,#90ee90,#4ecb71);color:#004d40;} 
+.btn{border-radius:12px;padding:8px 2px;min-height:80px;border:none;font-weight:900;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:manipulation;}
+.btn-free{background:#fff;color:#000;min-height:70px;font-size:11px;}
+.free-input{width:100%;padding:15px;font-size:24px;text-align:right;border-radius:12px;border:none;background:#fff;color:#000;font-weight:bold;}
+
+#m { position:fixed; inset:0; background:rgba(0,0,0,0.9); display:none; align-items:center; justify-content:center; z-index:1000; }
+.panel{width:98%;max-width:800px;max-height:95vh;background:#000;border-radius:24px;padding:15px;overflow-y:auto;border:1px solid #444;}
+.config-header{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:8px;padding:0 5px 10px;font-weight:bold;font-size:12px;color:var(--accent);text-align:center;}
+.config-item{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:8px;margin-bottom:8px;}
+.config-item input{background:#111;color:#fff;border:1px solid #333;padding:10px;border-radius:8px;font-size:12px;width:100%;}
+.cmd-btn{padding:16px;border-radius:12px;border:none;font-weight:bold;cursor:pointer;color:#fff;text-align:center;font-size:14px;}
 </style>
 </head>
 <body>
-<div id="top-anchor"></div>
 <div class="app">
     <div class="header">
-        <div><div class="title">♬積算電卓 V24.25</div><div style="font-size:11px;color:var(--muted);">ランクC/G修正・スクロール対応</div></div>
-        <div style="display:flex; gap:8px;">
-            <select id="rankSelector" style="padding:8px; background:#222; color:#fff; border:1px solid #444; border-radius:6px; font-weight:bold;"></select>
-            <button id="openSettings" style="background:#333; color:#fff; border:none; padding:10px 14px; border-radius:8px; font-weight:900;">⚙</button>
+        <div style="font-size:19px;font-weight:900">♬積算電卓 V26.9</div>
+        <div style="display:flex;gap:8px">
+            <select id="rSel" style="padding:8px;background:#222;color:#fff;border-radius:6px;border:1px solid #444;"></select>
+            <button onclick="openCfg()" style="background:#333;color:#fff;border:none;padding:10px;border-radius:8px;cursor:pointer">⚙ 設定</button>
         </div>
     </div>
-    <div class="top-section">
-        <div class="left" id="stack"></div>
-        <div class="right">
-            <div style="display:flex;justify-content:space-between;font-weight:bold;"><span>税抜</span><span id="preTax">0</span></div>
-            <div style="display:flex;justify-content:space-between;margin-top:8px;font-weight:bold;"><span>消費税(<span id="txDisp">10</span>%)</span><span id="tax">0</span></div>
-            <hr style="border:0; border-top:1px solid #333; margin:10px 0;">
-            <div style="display:flex;justify-content:space-between; color:var(--orange); font-size:24px; font-weight:900;"><span>合計</span><span id="total">0</span></div>
+
+    <div class="display-area">
+        <div id="stack" class="stack-view"></div>
+        <div class="total-view">
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:#9aa4ad"><span>税抜報酬</span><span id="sub">0</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:#9aa4ad;margin-top:4px"><span id="taxLabel">消費税(10%)</span><span id="tax">0</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:22px;font-weight:900;color:var(--orange);margin-top:10px;border-top:1px solid #333;padding-top:10px">
+                <span>合計</span><span id="tot">0</span>
+            </div>
         </div>
     </div>
-    <div class="buttons" id="buttonsArea"></div>
-    <div class="buttons" id="controlBtnsArea" style="margin-top:8px;"></div>
-    <div class="free-group">
-        <div class="free-title">下の金額入力欄に金額を入れて該当する作業ボタンを押してください</div>
-        <input id="freeValue" class="free-input" type="number" placeholder="金額入力" inputmode="numeric">
-        <div class="buttons" id="freeBtnsArea" style="margin-top:12px;"></div>
+
+    <div id="g1" class="grid"></div>
+    <div class="grid" style="margin-top:8px">
+        <button class="btn" style="background:var(--accent);color:#fff" onclick="window.open('https://betsunoid.github.io/hayamihyo/')">汎用早見表</button>
+        <div></div>
+        <button class="btn" style="background:var(--orange);color:#fff" onclick="pop()">C</button>
+        <button class="btn" style="background:var(--red);color:#fff" onclick="ac()">AC</button>
+    </div>
+
+    <div style="background:rgba(255,255,255,0.05);padding:15px;border-radius:15px;margin-top:12px">
+        <div style="font-size:11px;color:var(--accent);margin-bottom:8px;text-align:center;font-weight:bold;">金額を入力してから下の係数ボタンを押してください</div>
+        <input type="number" id="fVal" class="free-input" placeholder="金額入力" inputmode="numeric">
+        <div id="g2" class="grid" style="margin-top:12px"></div>
     </div>
 </div>
 
-<div class="modal" id="modal"><div class="panel">
-    <h3>⚙ 設定</h3>
-    <div style="margin-bottom:15px;">税率: <input id="taxInput" type="number" style="width:60px; text-align:center;"> %</div>
-    <div id="buttonConfigArea"></div>
-    <hr style="border:0; border-top:1px solid #333; margin:20px 0;">
-    <div id="freeConfigArea"></div>
-    <div class="modal-footer">
-        <button id="saveBtn" class="main-btn">設定を適用して閉じる</button>
-        <button id="ocrBtn" class="sub-btn" style="background:var(--orange);">PDF・画像から読込</button>
-        <button id="genBtn" class="sub-btn" style="background:var(--green);">最新HTMLを生成</button>
-        <button id="importBtn" class="sub-btn" style="background:var(--cyan);">インポート</button>
-        <button id="backupBtn" class="sub-btn" style="background:var(--gray);">バックアップ</button>
-        <button id="resetBtn" class="sub-btn" style="background:var(--red);">リセット</button>
-        <div id="closeBtn" style="grid-column: span 2; text-align: center; cursor: pointer; padding-top: 10px;">キャンセル</div>
+<div id="m">
+    <div class="panel">
+        <div style="background:#1a1a1a;padding:15px;border-radius:15px;margin-bottom:20px;border:1px solid var(--accent);">
+            <h4 style="margin:0 0 10px 0;color:var(--accent);">基本設定</h4>
+            <div style="display:flex;align-items:center;gap:15px;">
+                <span>消費税率 (%) :</span>
+                <input type="number" id="cfgTax" style="background:#000;color:#fff;border:1px solid #444;padding:8px;border-radius:5px;width:80px;" value="10">
+            </div>
+        </div>
+
+        <h3 style="text-align:center">⚙ 定数ボタン設定</h3>
+        <div class="config-header"><span>定数名</span><span>報酬</span><span>顧客請求額</span></div>
+        <div id="cButtons"></div>
+        <h3 style="text-align:center;margin-top:20px;">⚙ 係数ボタン設定</h3>
+        <div id="cFree"></div>
+        
+        <button onclick="save()" class="cmd-btn" style="background:#4a90e2;width:100%;margin:20px 0;">設定を適用して閉じる</button>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <input type="file" id="fileInp" style="display:none" accept="image/*,application/pdf">
+            <button class="cmd-btn" style="background:#f39c12;" onclick="document.getElementById('fileInp').click()">PDF・画像から読込</button>
+            <button onclick="gen()" class="cmd-btn" style="background:#5ab55e;">最新HTMLを生成</button>
+            <button class="cmd-btn" style="background:#5bc0de;" onclick="imp()">インポート</button>
+            <button class="cmd-btn" style="background:#777;" onclick="exp()">バックアップ</button>
+            <button onclick="if(confirm('設定をリセットしますか？')){localStorage.clear();location.reload();}" class="cmd-btn" style="background:#e74c3c;grid-column:span 2;">リセット</button>
+            <button onclick="closeCfg()" class="cmd-btn" style="background:#333;grid-column:span 2;">キャンセル</button>
+        </div>
     </div>
-</div></div>
+</div>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-
-// G2を内部的に管理しつつ、表示は「C」として扱うテーブル構成に修正
-const MASTER_TABLE = {
+const M = {
     "teikiUP": {H:6775, G:7462, F:7855, E:8149, D:8444, C:8836, B:9425, A:9524, S:9818, SS:10113, SSS:10211},
     "teikiGP": {H:8444, G:9327, F:9818, E:10211, D:10505, C:10996, B:11684, A:11880, S:12273, SS:12567, SSS:12764},
     "futsuUP": {H:7756, G:8542, F:9033, E:9327, D:9622, C:10113, B:10702, A:10898, S:11193, SS:11487, SSS:11684},
     "futsuGP": {H:9425, G:10407, F:10996, E:11389, D:11684, C:12273, B:13058, A:13255, S:13647, SS:14040, SSS:14236},
+    "gakkoUP": {H:4811, G:4811, F:4811, E:4811, D:5302, C:5302, B:5891, A:5891, S:5891, SS:5891, SSS:5891},
+    "gakkoGP": {H:5793, G:5793, F:5793, E:5793, D:6578, C:6578, B:7265, A:7265, S:7265, SS:7265, SSS:7265},
+    "gakkoCFS":{H:0, G:0, F:0, E:0, D:7560, C:7560, B:7560, A:8542, S:8542, SS:8542, SSS:8542},
+    "gakkoSWB":{H:0, G:0, F:0, E:0, D:0, C:0, B:0, A:8935, S:8935, SS:8935, SSS:8935},
+    "shuri":   {H:0.7364, G:0.7364, F:0.7364, E:0.7855, D:0.7855, C:0.7855, B:0.8836, A:0.8836, S:0.8836, SS:0.8836, SSS:0.8836},
     "nichito": {H:13745, G:14727, F:15709, E:16691, D:17673, C:18655, B:19636, A:19636, S:19636, SS:19636, SSS:19636}
 };
-const RANK_COEFF_TABLE = { H:0.7364, G:0.7364, F:0.7364, E:0.7855, D:0.7855, C:0.7855, B:0.8836, A:0.8836, S:0.8836, SS:0.8836, SSS:0.8836 };
 
-const INITIAL_CONFIG = {
-    "taxRate": 10,
-    "currentRank": "S",
-    "buttons": [
-        { "name": "定期UP", "masterKey": "teikiUP", "fixedReward": 0, "custPrice": "14000" },
-        { "name": "定期GP", "masterKey": "teikiGP", "fixedReward": 0, "custPrice": "17500" },
-        { "name": "普通UP", "masterKey": "futsuUP", "fixedReward": 0, "custPrice": "16000" },
-        { "name": "普通GP", "masterKey": "futsuGP", "fixedReward": 0, "custPrice": "19500" },
-        { "name": "音教備品UP", "masterKey": "", "fixedReward": 6382, "custPrice": "" },
-        { "name": "音教備品GP", "masterKey": "", "fixedReward": 7855, "custPrice": "" },
-        { "name": "納調UP", "masterKey": "", "fixedReward": 5891, "custPrice": "" },
-        { "name": "納調GP", "masterKey": "", "fixedReward": 8836, "custPrice": "" },
-        { "name": "店頭UP(名古屋店)", "masterKey": "", "fixedReward": 6382, "custPrice": "" },
-        { "name": "店頭GP(名古屋店)", "masterKey": "", "fixedReward": 7953, "custPrice": "" },
-        { "name": "店頭UP(RPS)", "masterKey": "", "fixedReward": 6382, "custPrice": "" },
-        { "name": "店頭GP(RPS)", "masterKey": "", "fixedReward": 8836, "custPrice": "" },
-        { "name": "出張費B", "masterKey": "", "fixedReward": 1473, "custPrice": "" },
-        { "name": "出張費3000", "masterKey": "", "fixedReward": 2356, "custPrice": "3000" },
-        { "name": "出張費3500", "masterKey": "", "fixedReward": 2847, "custPrice": "3500" },
-        { "name": "出張費4000", "masterKey": "", "fixedReward": 3338, "custPrice": "4000" },
-        { "name": "日当", "masterKey": "nichito", "fixedReward": 0, "custPrice": "" },
-        { "name": "ヤマハホール", "masterKey": "", "fixedReward": 12764, "custPrice": "" },
-        { "name": "除湿剤", "masterKey": "", "fixedReward": 655, "custPrice": "1600" },
-        { "name": "未登録", "masterKey": "", "fixedReward": 0, "custPrice": "" },
-        { "name": "追加1", "masterKey": "", "fixedReward": 0, "custPrice": "" },
-        { "name": "追加2", "masterKey": "", "fixedReward": 0, "custPrice": "" },
-        { "name": "追加3", "masterKey": "", "fixedReward": 0, "custPrice": "" },
-        { "name": "追加4", "masterKey": "", "fixedReward": 0, "custPrice": "" }
+let cfg = JSON.parse(localStorage.getItem("calc_v26_final")) || {
+    rank:"S", taxRate: 10,
+    btns: [
+        {n:"定期UP",v:"teikiUP",c:"14000"}, {n:"定期GP",v:"teikiGP",c:"17500"},
+        {n:"普通UP",v:"futsuUP",c:"16000"}, {n:"普通GP",v:"futsuGP",c:"19500"},
+        {n:"新品納調UP",v:5891,c:""}, {n:"新品納調GP",v:8836,c:""},
+        {n:"中古納調UP",v:5891,c:""}, {n:"中古納調GP",v:8836,c:""},
+        {n:"店頭UP(名古屋店)",v:6382,c:""}, {n:"店頭GP(名古屋店)",v:7953,c:""},
+        {n:"店頭UP(RPS)",v:6382,c:""}, {n:"店頭GP(RPS)",v:8836,c:""},
+        {n:"学校UP",v:"gakkoUP",c:""}, {n:"学校GP",v:"gakkoGP",c:""},
+        {n:"学校CF/S",v:"gakkoCFS",c:""}, {n:"学校SW/B",v:"gakkoSWB",c:""},
+        {n:"出張費3000",v:2356,c:"3000"}, {n:"出張費3500",v:2847,c:"3500"},
+        {n:"出張費4000",v:3338,c:"4000"}, {n:"出張費B",v:1473,c:""},
+        {n:"日当",v:"nichito",c:""}, {n:"音教備品UP",v:6382,c:""},
+        {n:"音教備品GP",v:7855,c:""}, {n:"ヤマハホール",v:12764,c:""},
+        {n:"除湿剤",v:655,c:1600}, {n:"未登録",v:0,c:""}, {n:"未登録",v:0,c:""}, {n:"未登録",v:0,c:""}
     ],
-    "freeButtons": [
-        { "name": "修理(%)", "isRankLinked": true, "coeff": 0.8836 },
-        { "name": "調整・割増", "isRankLinked": false, "coeff": 0.8836 },
-        { "name": "部品代", "isRankLinked": false, "coeff": 1 },
-        { "name": "立会い", "isRankLinked": false, "coeff": 0.864 },
-        { "name": "コンサート調律", "isRankLinked": false, "coeff": 0.7658 },
-        { "name": "YMJクレーム補填", "isRankLinked": false, "coeff": 0.6873 },
-        { "name": "GPS調律", "isRankLinked": false, "coeff": 0.6873 },
-        { "name": "早夜割増", "isRankLinked": false, "coeff": 0.864 },
-        { "name": "保守点検・管理調律", "isRankLinked": false, "coeff": 0.6873 },
-        { "name": "ピアノ診断", "isRankLinked": false, "coeff": 0.6873 },
-        { "name": "追加3", "isRankLinked": false, "coeff": 1 },
-        { "name": "追加4", "isRankLinked": false, "coeff": 1 }
+    fBtns: [
+        {n:"修理(%)",co:"shuri"}, {n:"部品代",co:1.0}, {n:"調整・割増",co:0.8836}, {n:"再調律",co:0.8836},
+        {n:"コンサート",co:0.7658}, {n:"立会い",co:0.864}, {n:"早夜割増",co:0.864}, {n:"GPS調律",co:0.6873},
+        {n:"ピアノ診断",co:0.6873}, {n:"管理・保守",co:0.6873}, {n:"YMJ補填",co:0.6873}, {n:"予備",co:1.0}
     ]
 };
 
-let cfg = JSON.parse(localStorage.getItem("rewardcalc_v2425")) || INITIAL_CONFIG;
-if (cfg.taxRate <= 0) cfg.taxRate = 10;
-
-let entries = [];
-
-function scrollToTop() {
-    setTimeout(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 100);
+let data = [];
+function update(){
+    const s = document.getElementById("stack"); s.innerHTML = ""; let sum = 0;
+    const tRate = cfg.taxRate || 10;
+    data.forEach((x, i) => { 
+        sum += x.p; 
+        s.innerHTML += `
+        <div class="entry" onclick="del(${i})">
+            <span class="entry-name">${x.n}</span>
+            <span class="entry-price">${Math.round(x.p).toLocaleString()}</span>
+            <span class="del-btn">×</span>
+        </div>`; 
+    });
+    document.getElementById("taxLabel").innerText = `消費税(${tRate}%)`;
+    document.getElementById("sub").innerText = Math.round(sum).toLocaleString();
+    document.getElementById("tax").innerText = Math.floor(sum * (tRate/100)).toLocaleString();
+    document.getElementById("tot").innerText = Math.floor(sum * (1 + tRate/100)).toLocaleString();
+    s.scrollTop = s.scrollHeight;
+    window.scrollTo(0,0);
 }
-
-function updateUI(){
-    const area = document.getElementById("stack"); area.innerHTML = "";
-    let sub = 0;
-    entries.forEach((e, i) => {
-        sub += e.price;
-        const row = document.createElement("div"); row.className = "entry";
-        row.innerHTML = `<div class="label">${e.name}</div><div style="display:flex;align-items:center;"><div class="price">${Math.round(e.price).toLocaleString()}</div><button class="removeBtn" onclick="entries.splice(${i},1);updateUI();">×</button></div>`;
-        area.appendChild(row);
+function del(i){ data.splice(i, 1); update(); }
+function draw(){
+    const g1 = document.getElementById("g1"); g1.innerHTML = "";
+    cfg.btns.forEach((b, i) => {
+        const v = M[b.v] ? M[b.v][cfg.rank] : Number(b.v);
+        const el = document.createElement("button");
+        let col = i % 4;
+        let colorClass = (col === 0 || col === 2) ? "btn-blue" : "btn-lblue";
+        if (b.n.includes("出張費")) colorClass = "btn-green";
+        el.className = "btn " + colorClass;
+        el.innerHTML = `<div style="font-size:10px">${b.n}</div><div style="font-size:16px">${Math.round(v).toLocaleString()}</div><div style="font-size:9px;opacity:0.6;">(${b.c||'-'})</div>`;
+        el.onclick = () => { if(v>0){data.push({n:b.n,p:v});update();} };
+        g1.appendChild(el);
     });
-    const tax = Math.floor(sub * cfg.taxRate / 100);
-    document.getElementById("preTax").textContent = sub.toLocaleString();
-    document.getElementById("tax").textContent = tax.toLocaleString();
-    document.getElementById("total").textContent = (sub+tax).toLocaleString();
-    document.getElementById("txDisp").textContent = cfg.taxRate;
+    const g2 = document.getElementById("g2"); g2.innerHTML = "";
+    cfg.fBtns.forEach(f => {
+        const c = M[f.co] ? (M[f.co][cfg.rank] || M[f.co]) : Number(f.co);
+        const el = document.createElement("button"); el.className = "btn btn-free";
+        el.innerHTML = `<div style="font-size:10px">${f.n}</div><div>×${typeof c === 'number' ? c.toFixed(4) : c}</div>`;
+        el.onclick = () => { const v = document.getElementById("fVal").value; if(v){data.push({n:f.n,p:v*c});update();document.getElementById("fVal").value="";} };
+        g2.appendChild(el);
+    });
 }
-
-function renderUI(){
-    const bArea = document.getElementById("buttonsArea"); bArea.innerHTML = "";
-    cfg.buttons.forEach((b, i) => {
-        const btn = document.createElement("button");
-        btn.className = `btn-base ${b.name.includes("出張費") ? 'btn-travel' : (i%4===0 || i%4===2 ? 'btn-dark' : 'btn-light')}`;
-        const r = (b.masterKey && MASTER_TABLE[b.masterKey]) ? MASTER_TABLE[b.masterKey][cfg.currentRank] : (b.fixedReward || 0);
-        btn.innerHTML = `<div class="btn-name">${b.name}</div><div class="btn-reward">${Math.round(r).toLocaleString()}</div><div class="btn-cust">${b.custPrice||'-'}</div>`;
-        btn.onclick = () => { if(r>0){entries.push({name:b.name, price:r}); updateUI(); scrollToTop();} };
-        bArea.appendChild(btn);
+function openCfg(){ document.getElementById("m").style.display="flex"; renderCfg(); }
+function closeCfg(){ document.getElementById("m").style.display="none"; }
+function renderCfg(){
+    document.getElementById("cfgTax").value = cfg.taxRate || 10;
+    const d1 = document.getElementById("cButtons"); d1.innerHTML = "";
+    cfg.btns.forEach((b,i)=>{ 
+        d1.innerHTML += `<div class="config-item"><input id="bn${i}" value="${b.n}"><input id="bv${i}" value="${b.v}"><input id="bc${i}" value="${b.c}"></div>`;
     });
-
-    const fArea = document.getElementById("freeBtnsArea"); fArea.innerHTML = "";
-    cfg.freeButtons.forEach(f => {
-        const b = document.createElement("button"); b.className="btn-base btn-free";
-        const co = (f.isRankLinked) ? RANK_COEFF_TABLE[cfg.currentRank] : f.coeff;
-        b.innerHTML = `<div class="btn-name">${f.name}</div><div class="btn-reward">×${co.toFixed(4)}</div>`;
-        b.onclick = () => {
-            const v = Number(document.getElementById("freeValue").value);
-            if(!v) return;
-            let res = f.name.includes("コンサート") ? Math.ceil(v * co / 100) * 100 : Math.floor(v * co);
-            entries.push({name:f.name, price:res}); updateUI(); document.getElementById("freeValue").value=""; scrollToTop();
-        };
-        fArea.appendChild(b);
+    const d2 = document.getElementById("cFree"); d2.innerHTML = "";
+    cfg.fBtns.forEach((f,i)=>{ 
+        d2.innerHTML += `<div class="config-item"><input id="fn${i}" value="${f.n}" style="grid-column:span 1.5"><input id="fc${i}" value="${f.co}" style="grid-column:span 1.5"></div>`;
     });
-
-    const cArea = document.getElementById("controlBtnsArea"); cArea.innerHTML = "";
-    [{n:"汎用早見表",c:"btn-blue",f:()=>window.open('https://betsunoid.github.io/hayamihyo/')},{n:""},{n:"C",c:"btn-c",f:()=>{entries.pop();updateUI();scrollToTop();}},{n:"AC",c:"btn-ac",f:()=>{entries=[];updateUI();scrollToTop();}}].forEach(c => {
-        const b = document.createElement("button"); b.className="btn-base "+c.c; b.innerHTML=c.n;
-        if(c.f) b.onclick=c.f; else b.style.visibility="hidden";
-        cArea.appendChild(b);
-    });
-
-    const rs = document.getElementById("rankSelector");
-    rs.innerHTML = "";
-    // リストの表示を修正（G2を排除し、Cとして独立させる）
-    ["H","G","F","E","D","C","B","A","S","SS","SSS"].forEach(r => {
-        const o = document.createElement("option"); o.value=r; o.textContent=r;
-        if(r===cfg.currentRank) o.selected=true; rs.appendChild(o);
-    });
-    rs.onchange = (e) => { cfg.currentRank = e.target.value; renderUI(); updateUI(); };
 }
+function save(){
+    cfg.taxRate = Number(document.getElementById("cfgTax").value);
+    cfg.btns.forEach((b,i)=>{ b.n=document.getElementById(`bn${i}`).value; let v=document.getElementById(`bv${i}`).value; b.v=isNaN(v)?v:Number(v); b.c=document.getElementById(`bc${i}`).value; });
+    cfg.fBtns.forEach((f,i)=>{ f.n=document.getElementById(`fn${i}`).value; let c=document.getElementById(`fc${i}`).value; f.co=isNaN(c)?c:Number(c); });
+    localStorage.setItem("calc_v26_final", JSON.stringify(cfg));
+    closeCfg(); draw(); update();
+}
+function pop(){ data.pop(); update(); }
+function ac(){ data = []; update(); }
+function gen(){ 
+    document.getElementById("m").style.display = "none";
+    const html = document.documentElement.outerHTML; 
+    const b = new Blob([html],{type:"text/html"}); 
+    const a = document.createElement("a"); a.href=URL.createObjectURL(b); a.download="calc_v26_9.html"; a.click(); 
+}
+function exp(){ const s = JSON.stringify(cfg); const b = new Blob([s],{type:"application/json"}); const a = document.createElement("a"); a.href=URL.createObjectURL(b); a.download="backup.json"; a.click(); }
+function imp(){ const i = document.createElement("input"); i.type="file"; i.accept=".json"; i.onchange = (e) => { const r = new FileReader(); r.onload = (f) => { cfg = JSON.parse(f.target.result); save(); location.reload(); }; r.readAsText(e.target.files[0]); }; i.click(); }
 
-document.getElementById("openSettings").onclick = () => {
-    document.getElementById("modal").style.display = "flex";
-    document.getElementById("taxInput").value = cfg.taxRate;
-    const bArea = document.getElementById("buttonConfigArea");
-    bArea.innerHTML = "<h4>定数ボタン (24)</h4>";
-    cfg.buttons.forEach((b, i) => {
-        const d = document.createElement("div"); d.className = "config-row";
-        const val = b.masterKey || b.fixedReward;
-        d.innerHTML = `<input class="col-name" id="bn${i}" value="${b.name}"><input class="col-val" id="br${i}" value="${val}"><input class="col-val" id="bc${i}" value="${b.custPrice}">`;
-        bArea.appendChild(d);
-    });
-    const fArea = document.getElementById("freeConfigArea");
-    fArea.innerHTML = "<h4>自由掛け率</h4>";
-    cfg.freeButtons.forEach((f, i) => {
-        const d = document.createElement("div"); d.className = "config-row";
-        d.innerHTML = `<input class="col-name" id="fn${i}" value="${f.name}"><input class="col-val" id="fc${i}" type="number" step="0.0001" value="${f.coeff}">`;
-        fArea.appendChild(d);
-    });
+window.onload = () => {
+    document.getElementById("m").style.display = "none";
+    const s = document.getElementById("rSel");
+    ["H","G","F","E","D","C","B","A","S","SS","SSS"].forEach(r=>{ const o=document.createElement("option"); o.value=o.text=r; if(r==cfg.rank)o.selected=true; s.add(o); });
+    s.onchange = (e) => { cfg.rank=e.target.value; draw(); update(); };
+    draw(); update();
 };
-
-document.getElementById("saveBtn").onclick = () => {
-    cfg.taxRate = Number(document.getElementById("taxInput").value) || 10;
-    cfg.buttons.forEach((b, i) => {
-        b.name = document.getElementById(`bn${i}`).value;
-        const r = document.getElementById(`br${i}`).value;
-        const keys = ["teikiUP", "teikiGP", "futsuUP", "futsuGP", "nichito"];
-        if (keys.includes(r)) { b.masterKey = r; b.fixedReward = 0; }
-        else { b.masterKey = ""; b.fixedReward = Number(r); }
-        b.custPrice = document.getElementById(`bc${i}`).value;
-    });
-    cfg.freeButtons.forEach((f, i) => {
-        f.name = document.getElementById(`fn${i}`).value;
-        f.coeff = Number(document.getElementById(`fc${i}`).value);
-    });
-    localStorage.setItem("rewardcalc_v2425", JSON.stringify(cfg));
-    document.getElementById("modal").style.display = "none";
-    renderUI(); updateUI();
-};
-
-document.getElementById("ocrBtn").onclick = async () => {
-    const input = document.createElement('input'); input.type = 'file';
-    input.onchange = async (e) => {
-        const file = e.target.files[0]; if(!file) return;
-        const btn = document.getElementById("ocrBtn"); btn.innerText = "解析中..."; btn.disabled = true;
-        try {
-            let imageData;
-            if (file.type === 'application/pdf') {
-                const pdf = await pdfjsLib.getDocument(URL.createObjectURL(file)).promise;
-                const page = await pdf.getPage(1);
-                const viewport = page.getViewport({ scale: 2 });
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.height = viewport.height; canvas.width = viewport.width;
-                await page.render({ canvasContext: context, viewport: viewport }).promise;
-                imageData = canvas.toDataURL('image/png');
-            } else { imageData = file; }
-            const res = await Tesseract.recognize(imageData, 'jpn');
-            const lines = res.data.text.split('\n');
-            cfg.buttons.forEach(b => {
-                if(b.masterKey) return;
-                for(let l of lines) {
-                   // 曖昧な一致を避けるため、完全に含まれているかチェック
-                   if(l.replace(/\s/g,'').includes(b.name.replace(/\s/g,''))){
-                        let m = l.match(/[0-9,]{3,7}/);
-                        if(m) b.fixedReward = Number(m[0].replace(/,/g,''));
-                    }
-                }
-            });
-            alert("解析完了"); localStorage.setItem("rewardcalc_v2425", JSON.stringify(cfg)); location.reload();
-        } catch(e) { alert("エラー: " + e); } finally { btn.innerText="PDF・画像から読込"; btn.disabled=false; }
-    };
-    input.click();
-};
-
-document.getElementById("backupBtn").onclick = () => {
-    const blob = new Blob([JSON.stringify(cfg, null, 2)], {type: 'application/json'});
-    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `reward_backup_${new Date().toISOString().slice(0,10)}.json`; a.click();
-};
-
-document.getElementById("importBtn").onclick = () => {
-    const input = document.createElement('input'); input.type = 'file';
-    input.onchange = (e) => {
-        const file = e.target.files[0]; if(!file) return;
-        const reader = new FileReader();
-        reader.onload = (re) => {
-            try {
-                const data = JSON.parse(re.target.result);
-                if(confirm("設定をインポートしますか？")){ cfg = data; localStorage.setItem("rewardcalc_v2425", JSON.stringify(cfg)); location.reload(); }
-            } catch(err) { alert("無効なファイルです"); }
-        };
-        reader.readAsText(file);
-    };
-    input.click();
-};
-
-document.getElementById("genBtn").onclick = () => {
-    let finalCfg = JSON.parse(JSON.stringify(cfg));
-    let html = document.documentElement.outerHTML;
-    html = html.replace(/const INITIAL_CONFIG = \{[\s\S]*?\};/, `const INITIAL_CONFIG = ${JSON.stringify(finalCfg, null, 4)};`);
-    html = html.replace(/<div class=\"modal\" id=\"modal\" style=\"display: flex;\">/g, '<div class=\"modal\" id=\"modal\">');
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([html], {type: "text/html"}));
-    a.download = "piano_calc_final_v2.html"; a.click();
-};
-
-document.getElementById("resetBtn").onclick = () => { if(confirm("リセット？")){ localStorage.removeItem("rewardcalc_v2425"); location.reload(); }};
-document.getElementById("closeBtn").onclick = () => document.getElementById("modal").style.display="none";
-
-renderUI(); updateUI();
 </script>
 </body>
 </html>
-
-
 
