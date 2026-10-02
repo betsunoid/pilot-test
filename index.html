@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>♬積算電卓 V27.0- バランス最適化版</title>
+<title>♬積算電卓 V27.1 - 簡易保守追加版</title>
 <style>
 :root{--bg:#0b0b0c;--card:#14171a;--accent:#1e90ff;--orange:#ff9500;--red:#f44336;font-family:sans-serif;}
 *{box-sizing:border-box}
@@ -48,7 +48,7 @@ body{margin:0;background:var(--bg);color:#fff;font-size:14px;overflow-x:hidden;}
 <body>
 <div class="app">
     <div class="header">
-        <div style="font-size:19px;font-weight:900">♬積算電卓 V27.0</div>
+        <div style="font-size:19px;font-weight:900">♬積算電卓 V27.1</div>
         <div style="display:flex;gap:8px">
             <select id="rSel" style="padding:8px;background:#222;color:#fff;border-radius:6px;border:1px solid #444; font-weight:bold;"></select>
             <button onclick="openCfg()" style="background:#333;color:#fff;border:none;padding:10px;border-radius:8px;cursor:pointer; font-weight:bold;">⚙ 設定</button>
@@ -143,7 +143,7 @@ let cfg = JSON.parse(localStorage.getItem("calc_v26_final")) || {
     fBtns: [
         {n:"修理(%)",co:"shuri"}, {n:"部品代",co:1.0}, {n:"調整・割増",co:0.8755}, {n:"再調律",co:0.8755},
         {n:"コンサート",co:0.7587}, {n:"立会い",co:0.8560}, {n:"早夜割増",co:0.8560}, {n:"GPS調律",co:0.6809},
-        {n:"ピアノ診断",co:0.6809}, {n:"管理・保守",co:0.6809}, {n:"YMJ補填",co:0.6809}, {n:"予備",co:1.0}
+        {n:"ピアノ診断",co:0.6809}, {n:"管理・保守",co:0.6809}, {n:"YMJ補填",co:0.6809}, {n:"教室掛率(簡易保守等）",co:0.9727}
     ]
 };
 
